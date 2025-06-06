@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskmanager/pages/ListOfTasks.dart';
+import 'package:taskmanager/pages/Splash.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-    home: const ListOfTaskPage(),
+    home: SplashScreen(
+      child: ListOfTaskPage(),
+      ),
     );
 
   }
