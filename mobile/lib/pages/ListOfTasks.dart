@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'AddTask.dart';
 
 class Task {
   String title;
-  String description;
-  
+  String content;
+  bool isCompleted;
 
-  Task({required this.title, required this.description});
+  Task({required this.title, required this.content, this.isCompleted = false});
 }
 
-class TaskListPage extends StatefulWidget {
+class ListOfTaskPage extends StatefulWidget {
+  const ListOfTaskPage({super.key});
+
   @override
-  _TaskListPageState createState() => _TaskListPageState();
+  _ListOfTaskPageState createState() => _ListOfTaskPageState();
 }
 
-class _TaskListPageState extends State<TaskListPage> {
+class _ListOfTaskPageState extends State<ListOfTaskPage> {
   List<Task> tasks = [];
+
   void _addTask() async {
     final newTask = await Navigator.push<Task>(
       context,
-      MaterialPageRoute(builder: (context) => AddEditTaskPage()),
+      MaterialPageRoute(builder: (context) => const AddEditTaskPage()),
     );
 
     if (newTask != null) {
@@ -32,7 +36,7 @@ class _TaskListPageState extends State<TaskListPage> {
     final editedTask = await Navigator.push<Task>(
       context,
       MaterialPageRoute(
-        builder: (context) => AddEditTaskPage(task: tasks[index]),
+        builder: (context) => AddEditTaskPage(task: tasks[index], index: index),
       ),
     );
 
@@ -43,22 +47,34 @@ class _TaskListPageState extends State<TaskListPage> {
     }
   }
 
+  void _deleteTask(int index) {
+    setState(() {
+      tasks.removeAt(index);
+    });
+  }
+
+  void _toggleTaskCompletion(int index) {
+    setState(() {
+      tasks.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Tasks'),
+        title: const Text('My Tasks'),
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
       body: tasks.isEmpty
-          ? Center(child: Text('No tasks yet. Add a new task!'))
+          ? const Center(child: Text('No tasks yet. Add a new one!'))
           : ListView.builder(
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 var task = tasks[index];
                 return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -66,100 +82,34 @@ class _TaskListPageState extends State<TaskListPage> {
                   child: ListTile(
                     title: Text(
                       task.title.isNotEmpty ? task.title : 'Untitled Task',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      task.description.isNotEmpty
-                          ? task.description
-                          : 'No description provided',
+                      task.content.isNotEmpty ? task.content : 'No content provided',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     onTap: () => _editTask(index),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteTask(index),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.check_circle_outline),
+                          onPressed: () => _toggleTaskCompletion(index),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTask,
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class AddEditTaskPage extends StatefulWidget {
-  final Task? task;
-
-  AddEditTaskPage({this.task});
-
-  @override
-  _AddEditTaskPageState createState() => _AddEditTaskPageState();
-}
-
-class _AddEditTaskPageState extends State<AddEditTaskPage> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _descController;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController =
-        TextEditingController(text: widget.task?.title ?? '');
-    _descController =
-        TextEditingController(text: widget.task?.description ?? '');
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descController.dispose();
-    super.dispose();
-  }
-
-  void _saveTask() {
-    if (_formKey.currentState!.validate()) {
-      final newTask = Task(
-        title: _titleController.text.trim(),
-        description: _descController.text.trim(),
-      );
-      Navigator.pop(context, newTask);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.task == null ? 'Add Task' : 'Edit Task'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: 'Task Title'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Enter a title' : null,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _descController,
-                decoration: InputDecoration(labelText: 'Description'),
-                maxLines: 3,
-              ),
-              SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _saveTask,
-                child: Text('Save Task'),
-              )
-            ],
-          ),
-        ),
+        child: const Icon(Icons.add),
       ),
     );
   }

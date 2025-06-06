@@ -16,7 +16,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-    home: const ListOfTasks(),
+      debugShowCheckedModeBanner: false,
+    home: const ListOfTaskPage(),
     );
 
   }
